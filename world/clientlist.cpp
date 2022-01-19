@@ -1375,6 +1375,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 		{ EQ::versions::ClientVersion::UF, 0 },
 		{ EQ::versions::ClientVersion::RoF, 0 },
 		{ EQ::versions::ClientVersion::RoF2, 0 }
+		{ EQ::versions::ClientVersion::SixtyFourBit, 0 }
 	};
 
 	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
@@ -1404,7 +1405,8 @@ void ClientList::SendClientVersionSummary(const char *Name)
 		client_count[EQ::versions::ClientVersion::SoD] +
 		client_count[EQ::versions::ClientVersion::UF] +
 		client_count[EQ::versions::ClientVersion::RoF] +
-		client_count[EQ::versions::ClientVersion::RoF2]
+		client_count[EQ::versions::ClientVersion::RoF2] +
+		client_count[EQ::versions::ClientVersion::SixtyFourBit]
 	);
 
 	zoneserver_list.SendEmoteMessage(
@@ -1421,6 +1423,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 			client_count[EQ::versions::ClientVersion::UF],
 			client_count[EQ::versions::ClientVersion::RoF],
 			client_count[EQ::versions::ClientVersion::RoF2],
+			client_count[EQ::versions::ClientVersion::SixtyFourBit],
 			(total_clients != 1 ? "s" : ""),
 			total_clients,
 			(total_clients != 1 ? "s" : ""),

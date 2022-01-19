@@ -921,6 +921,77 @@ static const uint8 SkillDamageTypes[EQ::skills::HIGHEST_SKILL + 1] = // change t
 **
 */
 
+enum InventoryMapTypes : int16 {
+	MapPossessions = 0,
+	MapBank,
+	MapSharedBank,
+	MapTrade,
+	MapWorld,
+	MapLimbo,
+	MapTribute,
+	MapTrophyTribute,
+	MapGuildTribute,
+	MapMerchant,
+	MapDeleted,
+	MapCorpse,
+	MapBazaar,
+	MapInspect,
+	MapRealEstate,
+	MapViewMODPC,
+	MapViewMODBank,
+	MapViewMODSharedBank,
+	MapViewMODLimbo,
+	MapAltStorage,
+	MapArchived,
+	MapMail,
+	MapGuildTrophyTribute,
+	MapKrono,
+	MapOther,
+	MapMercenaryItems,
+	MapViewMODMercenaryItems,
+	MapMountKeyRingItems,
+	MapViewMODMountKeyRingItems,
+	_MapCount
+};
+
+enum InventoryMainTypes : int16 {
+	MainCharm = 0,
+	MainEar1,
+	MainHead,
+	MainFace,
+	MainEar2,
+	MainNeck,
+	MainShoulders,
+	MainArms,
+	MainBack,
+	MainWrist1,
+	MainWrist2,
+	MainRange,
+	MainHands,
+	MainPrimary,
+	MainSecondary,
+	MainFinger1,
+	MainFinger2,
+	MainChest,
+	MainLegs,
+	MainFeet,
+	MainWaist,
+	MainPowerSource = 9999, // temp
+	MainAmmo = 21, // temp
+	MainGeneral1,
+	MainGeneral2,
+	MainGeneral3,
+	MainGeneral4,
+	MainGeneral5,
+	MainGeneral6,
+	MainGeneral7,
+	MainGeneral8,
+	//MainGeneral9,
+	//MainGeneral10,
+	MainCursor,
+	_MainCount
+};
+
 #define INVALID_INDEX	-1
 
 static const uint32 MAX_SPELL_DB_ID_VAL = 65535;

@@ -105,6 +105,8 @@ SET(common_sources
 	patches/rof_limits.cpp
 	patches/rof2.cpp
 	patches/rof2_limits.cpp
+	patches/tds.cpp
+	patches/tds_limits.cpp
 	patches/titanium.cpp
 	patches/titanium_limits.cpp
 	patches/uf.cpp
@@ -628,6 +630,11 @@ SET(common_headers
 	patches/rof2_limits.h
 	patches/rof2_ops.h
 	patches/rof2_structs.h
+	patches/tds.h
+	patches/tds_limits.h
+	patches/tds_constants.h
+	patches/tds_ops.h
+	patches/tds_structs.h
 	patches/titanium.h
 	patches/titanium_limits.h
 	patches/titanium_ops.h
@@ -712,6 +719,11 @@ SOURCE_GROUP(Patches FILES
 	patches/rof2_limits.h
 	patches/rof2_ops.h
 	patches/rof2_structs.h
+	patches/tds.h
+	patches/tds_limits.h
+	patches/tds_ops.h
+	patches/tds_constants.h
+	patches/tds_structs.h
 	patches/titanium.h
 	patches/titanium_limits.h
 	patches/titanium_ops.h
@@ -729,6 +741,9 @@ SOURCE_GROUP(Patches FILES
 	patches/rof_limits.cpp
 	patches/rof2.cpp
 	patches/rof2_limits.cpp
+	patches/tds.cpp
+	patches/tds_limits.cpp
+	patches/tds_constants.cpp
 	patches/titanium.cpp
 	patches/titanium_limits.cpp
 	patches/uf.cpp
@@ -754,7 +769,7 @@ ADD_LIBRARY(common ${common_sources} ${common_headers} ${repositories})
 
 IF(UNIX)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)
-	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp"  "patches/rof2.cpp" "patches/uf.cpp" PROPERTIES COMPILE_FLAGS -O0)
+	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp" "patches/rof2.cpp" "patches/tds.cpp" "patches/uf.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
 
