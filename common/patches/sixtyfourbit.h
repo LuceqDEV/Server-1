@@ -17,14 +17,14 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef COMMON_TDS_H
-#define COMMON_TDS_H
+#ifndef COMMON_SixtyFourBit_H
+#define COMMON_SixtyFourBit_H
 
 #include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
-namespace TDS {
+namespace SixtyFourBit {
 
 	//these are the only public member of this namespace.
 	extern void Register(EQStreamIdentifier &into);
@@ -46,9 +46,9 @@ namespace TDS {
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"
-		#include "tds_ops.h"
+		#include "SixtyFourBit_ops.h"
 	};
 
-}; /*TDS*/
+}; /*SixtyFourBit*/
 
-#endif /*COMMON_TDS_H*/
+#endif /*COMMON_SixtyFourBit_H*/

@@ -31,7 +31,7 @@ static const uint32 BIT_SoD			= 8;
 static const uint32 BIT_UF			= 16;
 static const uint32 BIT_RoF			= 32;
 static const uint32 BIT_RoF2		= 64;
-static const uint32 BIT_TDS			= 128;
+static const uint32 BIT_SixtyFourBit		= 128;
 
 static const uint32 BIT_TitaniumAndEarlier	= 0x00000003;
 static const uint32 BIT_SoFAndLater			= 0xFFFFFFFC;
@@ -39,7 +39,7 @@ static const uint32 BIT_SoDAndLater			= 0xFFFFFFF8;
 static const uint32 BIT_UFAndLater			= 0xFFFFFFF0;
 static const uint32 BIT_RoFAndLater			= 0xFFFFFFE0;
 static const uint32 BIT_RoF2AndLater		= 0xFFFFFFC0;
-static const uint32 BIT_TDSAndLater			= 0xFFFFFF80;
+static const uint32 BIT_SixtyFourBitAndLater			= 0xFFFFFF80;
 static const uint32 BIT_AllClients			= 0xFFFFFFFF;
 
 enum class ClientVersion
@@ -52,7 +52,7 @@ enum class ClientVersion
 	UF,			// Build: 'Jun  8 2010 16:44:32'
 	RoF,		// Build: 'Dec 10 2012 17:35:44'
 	RoF2,		// Build: 'May 10 2013 23:30:08'
-	TDS,		// Build: 'May 27 2015 18:23:40'
+	SixtyFourBit,		// Build: 'May 27 2015 18:23:40'
 
 	MobNPC,
 	MobMerc,
@@ -61,7 +61,7 @@ enum class ClientVersion
 };
 
 #define CLIENT_VERSION_COUNT 13
-#define LAST_PC_CLIENT ClientVersion::TDS
+#define LAST_PC_CLIENT ClientVersion::SixtyFourBit
 #define LAST_NPC_CLIENT ClientVersion::MobPet
 
 
@@ -85,8 +85,8 @@ static const char* ClientVersionName(ClientVersion version)
 		return "RoF";
 	case ClientVersion::RoF2:
 		return "RoF2";
-	case ClientVersion::TDS:
-		return "TDS";
+	case ClientVersion::SixtyFourBit:
+		return "SixtyFourBit";
 	case ClientVersion::MobNPC:
 		return "MobNPC";
 	case ClientVersion::MobMerc:
@@ -120,8 +120,8 @@ static const char* ClientVersionDescription(ClientVersion version)
 		return "Rain of Fear";
 	case ClientVersion::RoF2:
 		return "Rain of Fear (2)";
-	case ClientVersion::TDS:
-		return "The Darkened Sea";
+	case ClientVersion::SixtyFourBit:
+		return "64-Bit Live";
 	case ClientVersion::MobNPC:
 		return "MobNPC";
 	case ClientVersion::MobMerc:
@@ -148,7 +148,7 @@ static uint32 ClientBitFromVersion(ClientVersion clientVersion)
 	case ClientVersion::UF:
 	case ClientVersion::RoF:
 	case ClientVersion::RoF2:
-	case ClientVersion::TDS:
+	case ClientVersion::SixtyFourBit:
 	case ClientVersion::MobNPC:
 	case ClientVersion::MobMerc:
 	case ClientVersion::MobBot:
@@ -178,8 +178,8 @@ static ClientVersion ClientVersionFromBit(uint32 clientVersionBit)
 		return ClientVersion::RoF;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::RoF2) - 1)):
 		return ClientVersion::RoF2;
-	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::TDS) - 1)):
-		return ClientVersion::TDS;
+	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::SixtyFourBit) - 1)):
+		return ClientVersion::SixtyFourBit;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::MobNPC) - 1)):
 		return ClientVersion::MobNPC;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::MobMerc) - 1)):

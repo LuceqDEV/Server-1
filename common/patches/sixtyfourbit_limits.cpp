@@ -17,12 +17,12 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "tds_limits.h"
+#include "sixtyfourbit_limits.h"
 
 #include "../string_util.h"
 
 
-int16 TDS::invtype::GetInvTypeSize(int16 inv_type)
+int16 SixtyFourBit::invtype::GetInvTypeSize(int16 inv_type)
 {
 	switch (inv_type) {
 	case invtype::typePossessions:
@@ -80,7 +80,7 @@ int16 TDS::invtype::GetInvTypeSize(int16 inv_type)
 	}
 }
 
-const char* TDS::invtype::GetInvTypeName(int16 inv_type)
+const char* SixtyFourBit::invtype::GetInvTypeName(int16 inv_type)
 {
 	switch (inv_type) {
 	case invtype::TYPE_INVALID:
@@ -140,7 +140,7 @@ const char* TDS::invtype::GetInvTypeName(int16 inv_type)
 	}
 }
 
-bool TDS::invtype::IsInvTypePersistent(int16 inv_type)
+bool SixtyFourBit::invtype::IsInvTypePersistent(int16 inv_type)
 {
 	switch (inv_type) {
 	case invtype::typePossessions:
@@ -158,7 +158,7 @@ bool TDS::invtype::IsInvTypePersistent(int16 inv_type)
 	}
 }
 
-const char* TDS::invslot::GetInvPossessionsSlotName(int16 inv_slot)
+const char* SixtyFourBit::invslot::GetInvPossessionsSlotName(int16 inv_slot)
 {
 	switch (inv_slot) {
 	case invslot::SLOT_INVALID:
@@ -236,7 +236,7 @@ const char* TDS::invslot::GetInvPossessionsSlotName(int16 inv_slot)
 	}
 }
 
-const char* TDS::invslot::GetInvSlotName(int16 inv_type, int16 inv_slot)
+const char* SixtyFourBit::invslot::GetInvSlotName(int16 inv_type, int16 inv_slot)
 {
 	if (inv_type == invtype::typePossessions)
 		return invslot::GetInvPossessionsSlotName(inv_slot);
@@ -255,7 +255,7 @@ const char* TDS::invslot::GetInvSlotName(int16 inv_type, int16 inv_slot)
 	return ret_str.c_str();
 }
 
-const char* TDS::invbag::GetInvBagIndexName(int16 bag_index)
+const char* SixtyFourBit::invbag::GetInvBagIndexName(int16 bag_index)
 {
 	if (bag_index == invbag::SLOT_INVALID)
 		return "Invalid Bag";
@@ -269,7 +269,7 @@ const char* TDS::invbag::GetInvBagIndexName(int16 bag_index)
 	return ret_str.c_str();
 }
 
-const char* TDS::invaug::GetInvAugIndexName(int16 aug_index)
+const char* SixtyFourBit::invaug::GetInvAugIndexName(int16 aug_index)
 {
 	if (aug_index == invaug::SOCKET_INVALID)
 		return "Invalid Augment";

@@ -105,13 +105,13 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		RoF2::constants::CHARACTER_CREATION_LIMIT,
 		RoF2::constants::SAY_LINK_BODY_SIZE
 	),
-	/*[ClientVersion::TDS] =*/
+	/*[ClientVersion::SixtyFourBit] =*/
 	EQ::constants::LookupEntry(
-		TDS::constants::EXPANSION,
-		TDS::constants::EXPANSION_BIT,
-		TDS::constants::EXPANSIONS_MASK,
-		TDS::constants::CHARACTER_CREATION_LIMIT,
-		TDS::constants::SAY_LINK_BODY_SIZE
+		SixtyFourBit::constants::EXPANSION,
+		SixtyFourBit::constants::EXPANSION_BIT,
+		SixtyFourBit::constants::EXPANSIONS_MASK,
+		SixtyFourBit::constants::CHARACTER_CREATION_LIMIT,
+		SixtyFourBit::constants::SAY_LINK_BODY_SIZE
 	)
 };
 
@@ -378,32 +378,32 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 		RoF2::inventory::ConcatenateInvTypeLimbo,
 		RoF2::inventory::AllowOverLevelEquipment
 	),
-	/*[MobVersion::TDS] =*/
+	/*[MobVersion::SixtyFourBit] =*/
 	EQ::inventory::LookupEntry(
 		EQ::inventory::LookupEntry::InventoryTypeSize_Struct(
-			EQ::invtype::POSSESSIONS_SIZE,		TDS::invtype::BANK_SIZE,					TDS::invtype::SHARED_BANK_SIZE,
-			TDS::invtype::TRADE_SIZE,			TDS::invtype::WORLD_SIZE,					TDS::invtype::LIMBO_SIZE,
-			TDS::invtype::TRIBUTE_SIZE,			TDS::invtype::TROPHY_TRIBUTE_SIZE,			TDS::invtype::GUILD_TRIBUTE_SIZE,
-			TDS::invtype::MERCHANT_SIZE,		TDS::invtype::DELETED_SIZE,					TDS::invtype::CORPSE_SIZE,
-			TDS::invtype::BAZAAR_SIZE,			TDS::invtype::INSPECT_SIZE,					TDS::invtype::REAL_ESTATE_SIZE,
-			TDS::invtype::VIEW_MOD_PC_SIZE,		TDS::invtype::VIEW_MOD_BANK_SIZE,			TDS::invtype::VIEW_MOD_SHARED_BANK_SIZE,
-			TDS::invtype::VIEW_MOD_LIMBO_SIZE,	TDS::invtype::ALT_STORAGE_SIZE,				TDS::invtype::ARCHIVED_SIZE,
-			TDS::invtype::MAIL_SIZE,			TDS::invtype::GUILD_TROPHY_TRIBUTE_SIZE,	TDS::invtype::KRONO_SIZE,
-			TDS::invtype::OTHER_SIZE
+			EQ::invtype::POSSESSIONS_SIZE,		SixtyFourBit::invtype::BANK_SIZE,					SixtyFourBit::invtype::SHARED_BANK_SIZE,
+			SixtyFourBit::invtype::TRADE_SIZE,			SixtyFourBit::invtype::WORLD_SIZE,					SixtyFourBit::invtype::LIMBO_SIZE,
+			SixtyFourBit::invtype::TRIBUTE_SIZE,			SixtyFourBit::invtype::TROPHY_TRIBUTE_SIZE,			SixtyFourBit::invtype::GUILD_TRIBUTE_SIZE,
+			SixtyFourBit::invtype::MERCHANT_SIZE,		SixtyFourBit::invtype::DELETED_SIZE,					SixtyFourBit::invtype::CORPSE_SIZE,
+			SixtyFourBit::invtype::BAZAAR_SIZE,			SixtyFourBit::invtype::INSPECT_SIZE,					SixtyFourBit::invtype::REAL_ESTATE_SIZE,
+			SixtyFourBit::invtype::VIEW_MOD_PC_SIZE,		SixtyFourBit::invtype::VIEW_MOD_BANK_SIZE,			SixtyFourBit::invtype::VIEW_MOD_SHARED_BANK_SIZE,
+			SixtyFourBit::invtype::VIEW_MOD_LIMBO_SIZE,	SixtyFourBit::invtype::ALT_STORAGE_SIZE,				SixtyFourBit::invtype::ARCHIVED_SIZE,
+			SixtyFourBit::invtype::MAIL_SIZE,			SixtyFourBit::invtype::GUILD_TROPHY_TRIBUTE_SIZE,	SixtyFourBit::invtype::KRONO_SIZE,
+			SixtyFourBit::invtype::OTHER_SIZE
 		),
 
-		TDS::invslot::EQUIPMENT_BITMASK,
-		TDS::invslot::GENERAL_BITMASK,
-		TDS::invslot::CURSOR_BITMASK,
-		TDS::invslot::POSSESSIONS_BITMASK,
-		TDS::invslot::CORPSE_BITMASK,
-		TDS::invbag::SLOT_COUNT,
-		TDS::invaug::SOCKET_COUNT,
+		SixtyFourBit::invslot::EQUIPMENT_BITMASK,
+		SixtyFourBit::invslot::GENERAL_BITMASK,
+		SixtyFourBit::invslot::CURSOR_BITMASK,
+		SixtyFourBit::invslot::POSSESSIONS_BITMASK,
+		SixtyFourBit::invslot::CORPSE_BITMASK,
+		SixtyFourBit::invbag::SLOT_COUNT,
+		SixtyFourBit::invaug::SOCKET_COUNT,
 
-		TDS::inventory::AllowEmptyBagInBag,
-		TDS::inventory::AllowClickCastFromBag,
-		TDS::inventory::ConcatenateInvTypeLimbo,
-		TDS::inventory::AllowOverLevelEquipment
+		SixtyFourBit::inventory::AllowEmptyBagInBag,
+		SixtyFourBit::inventory::AllowClickCastFromBag,
+		SixtyFourBit::inventory::ConcatenateInvTypeLimbo,
+		SixtyFourBit::inventory::AllowOverLevelEquipment
 	),
 	/*[MobVersion::NPC] =*/
 	EQ::inventory::LookupEntry(
@@ -786,24 +786,24 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 	/*[MobVersion::OfflineTDS] =*/
 	EQ::inventory::LookupEntry(
 		EQ::inventory::LookupEntry::InventoryTypeSize_Struct(
-			TDS::INULL,							TDS::INULL,							TDS::INULL,
-			TDS::invtype::TRADE_SIZE,			TDS::INULL,							TDS::INULL,
-			TDS::INULL,							TDS::INULL,							TDS::INULL,
-			TDS::invtype::MERCHANT_SIZE,		TDS::INULL,							TDS::INULL,
-			TDS::invtype::BAZAAR_SIZE,			TDS::invtype::INSPECT_SIZE,			TDS::INULL,
-			TDS::invtype::VIEW_MOD_PC_SIZE,		TDS::invtype::VIEW_MOD_BANK_SIZE,	TDS::invtype::VIEW_MOD_SHARED_BANK_SIZE,
-			TDS::invtype::VIEW_MOD_LIMBO_SIZE,	TDS::INULL,							TDS::INULL,
-			TDS::INULL,							TDS::INULL,							TDS::INULL,
-			TDS::INULL
+			SixtyFourBit::INULL,							SixtyFourBit::INULL,							SixtyFourBit::INULL,
+			SixtyFourBit::invtype::TRADE_SIZE,			SixtyFourBit::INULL,							SixtyFourBit::INULL,
+			SixtyFourBit::INULL,							SixtyFourBit::INULL,							SixtyFourBit::INULL,
+			SixtyFourBit::invtype::MERCHANT_SIZE,		SixtyFourBit::INULL,							SixtyFourBit::INULL,
+			SixtyFourBit::invtype::BAZAAR_SIZE,			SixtyFourBit::invtype::INSPECT_SIZE,			SixtyFourBit::INULL,
+			SixtyFourBit::invtype::VIEW_MOD_PC_SIZE,		SixtyFourBit::invtype::VIEW_MOD_BANK_SIZE,	SixtyFourBit::invtype::VIEW_MOD_SHARED_BANK_SIZE,
+			SixtyFourBit::invtype::VIEW_MOD_LIMBO_SIZE,	SixtyFourBit::INULL,							SixtyFourBit::INULL,
+			SixtyFourBit::INULL,							SixtyFourBit::INULL,							SixtyFourBit::INULL,
+			SixtyFourBit::INULL
 		),
 
-		TDS::INULL,
-		TDS::INULL,
-		TDS::INULL,
-		TDS::INULL,
-		TDS::INULL,
-		TDS::invbag::SLOT_COUNT,
-		TDS::invaug::SOCKET_COUNT,
+		SixtyFourBit::INULL,
+		SixtyFourBit::INULL,
+		SixtyFourBit::INULL,
+		SixtyFourBit::INULL,
+		SixtyFourBit::INULL,
+		SixtyFourBit::invbag::SLOT_COUNT,
+		SixtyFourBit::invaug::SOCKET_COUNT,
 
 		false,
 		false,
@@ -914,7 +914,7 @@ void EQ::inventory::InitializeDynamicLookups() {
 
 		// special case gm exclusions based on known behaviors
 		switch (iter) {
-		// case static_cast<uint32>(versions::MobVersion::TDS) : TODO - Check this
+		// case static_cast<uint32>(versions::MobVersion::SixtyFourBit) : TODO - Check this
 		case static_cast<uint32>(versions::MobVersion::RoF2) :
 		case static_cast<uint32>(versions::MobVersion::RoF) :
 			// if bank size is not altered on these clients, then static will suffice
@@ -1057,9 +1057,9 @@ static const EQ::behavior::LookupEntry behavior_static_lookup_entries[EQ::versio
 	EQ::behavior::LookupEntry(
 		RoF2::behavior::CoinHasWeight
 	),
-	/*[MobVersion::TDS] =*/
+	/*[MobVersion::SixtyFourBit] =*/
 	EQ::behavior::LookupEntry(
-		TDS::behavior::CoinHasWeight
+		SixtyFourBit::behavior::CoinHasWeight
 	),
 	/*[MobVersion::NPC] =*/
 	EQ::behavior::LookupEntry(
@@ -1119,7 +1119,7 @@ static const EQ::behavior::LookupEntry behavior_static_lookup_entries[EQ::versio
 	),
 	/*[MobVersion::OfflineTDS] =*/
 	EQ::behavior::LookupEntry(
-		TDS::behavior::CoinHasWeight
+		SixtyFourBit::behavior::CoinHasWeight
 	)
 };
 
@@ -1274,18 +1274,18 @@ static const EQ::spells::LookupEntry spells_static_lookup_entries[EQ::versions::
 		RoF2::spells::PET_BUFFS,
 		RoF2::spells::MERC_BUFFS
 	),
-	/*[ClientVersion::TDS] =*/
+	/*[ClientVersion::SixtyFourBit] =*/
 	EQ::spells::LookupEntry(
-		TDS::spells::SPELL_ID_MAX,
-		TDS::spells::SPELLBOOK_SIZE,
+		SixtyFourBit::spells::SPELL_ID_MAX,
+		SixtyFourBit::spells::SPELLBOOK_SIZE,
 		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
-		TDS::spells::LONG_BUFFS,
-		TDS::spells::SHORT_BUFFS,
-		TDS::spells::DISC_BUFFS,
-		TDS::spells::TOTAL_BUFFS,
-		TDS::spells::NPC_BUFFS,
-		TDS::spells::PET_BUFFS,
-		TDS::spells::MERC_BUFFS
+		SixtyFourBit::spells::LONG_BUFFS,
+		SixtyFourBit::spells::SHORT_BUFFS,
+		SixtyFourBit::spells::DISC_BUFFS,
+		SixtyFourBit::spells::TOTAL_BUFFS,
+		SixtyFourBit::spells::NPC_BUFFS,
+		SixtyFourBit::spells::PET_BUFFS,
+		SixtyFourBit::spells::MERC_BUFFS
 	)
 };
 

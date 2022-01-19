@@ -37,7 +37,7 @@ namespace EQ
 			UF,			// Build: 'Jun  8 2010 16:44:32'
 			RoF,		// Build: 'Dec 10 2012 17:35:44'
 			RoF2,		// Build: 'May 10 2013 23:30:08'
-			TDS			// Build: 'May 27 2015 18:23:40'
+			SixtyFourBit			// Build: 'May 27 2015 18:23:40'
 		};
 
 		enum ClientVersionBitmask : uint32 {
@@ -49,7 +49,7 @@ namespace EQ
 			bitUF = 0x00000010,
 			bitRoF = 0x00000020,
 			bitRoF2 = 0x00000040,
-			bitTDS = 0x00000080,
+			bitSixtyFourBit = 0x00000080,
 			maskUnknown = 0x00000000,
 			maskTitaniumAndEarlier = 0x00000003,
 			maskSoFAndEarlier = 0x00000007,
@@ -61,11 +61,11 @@ namespace EQ
 			maskUFAndLater = 0xFFFFFFF0,
 			maskRoFAndLater = 0xFFFFFFE0,
 			maskRoF2AndLater = 0xFFFFFFC0,
-			maskTDSAndLater = 0xFFFFFF80,
+			maskSixtyFourBitAndLater = 0xFFFFFF80,
 			maskAllClients = 0xFFFFFFFF
 		};
 
-		const ClientVersion LastClientVersion = ClientVersion::TDS;
+		const ClientVersion LastClientVersion = ClientVersion::SixtyFourBit;
 		const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
 
 		bool IsValidClientVersion(ClientVersion client_version);
@@ -83,7 +83,7 @@ namespace EQ
 			UF,
 			RoF,
 			RoF2,
-			TDS,
+			SixtyFourBit,
 			NPC,
 			NPCMerchant,
 			Merc,
@@ -98,13 +98,13 @@ namespace EQ
 			OfflineUF,
 			OfflineRoF,
 			OfflineRoF2,
-			OfflineTDS
+			OfflineSixtyFourBit
 		};
 
-		const MobVersion LastMobVersion = MobVersion::OfflineTDS;
-		const MobVersion LastPCMobVersion = MobVersion::TDS;
+		const MobVersion LastMobVersion = MobVersion::OfflineSixtyFourBit;
+		const MobVersion LastPCMobVersion = MobVersion::SixtyFourBit;
 		const MobVersion LastNonPCMobVersion = MobVersion::BotPet;
-		const MobVersion LastOfflinePCMobVersion = MobVersion::OfflineTDS;
+		const MobVersion LastOfflinePCMobVersion = MobVersion::OfflineSixtyFourBit;
 		const size_t MobVersionCount = (static_cast<size_t>(LastMobVersion) + 1);
 
 		bool IsValidMobVersion(MobVersion mob_version);
@@ -137,7 +137,7 @@ namespace EQ
 			ucsUFCombined = 'E',
 			ucsRoFCombined = 'F',
 			ucsRoF2Combined = 'G',
-			ucsTDSCombined = 'H'
+			ucsSixtyFourBitCombined = 'H'
 		};
 
 	} /*versions*/
@@ -165,7 +165,7 @@ namespace EQ
 			VoA,
 			RoF,
 			CotF,
-			TDS
+			SixtyFourBit
 		};
 
 		enum ExpansionBitmask : uint32 {
@@ -190,7 +190,7 @@ namespace EQ
 			bitVoA = 0x00020000,
 			bitRoF = 0x00040000,
 			bitCotF = 0x00080000,
-			bitTDS = 0x00100000,
+			bitSixtyFourBit = 0x00100000,
 			maskEverQuest = 0x00000000,
 			maskRoK = 0x00000001,
 			maskSoV = 0x00000003,
@@ -212,7 +212,7 @@ namespace EQ
 			maskVoA = 0x0003FFFF,
 			maskRoF = 0x0007FFFF,
 			maskCotF = 0x000FFFFF,
-			maskTDS = 0x001FFFFF
+			maskSixtyFourBit = 0x001FFFFF
 		};
 
 		const char* ExpansionName(Expansion expansion);

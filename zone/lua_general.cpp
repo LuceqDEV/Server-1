@@ -4352,7 +4352,7 @@ luabind::scope lua_register_client_version() {
 			luabind::value("UF", static_cast<int>(EQ::versions::ClientVersion::UF)),
 			luabind::value("RoF", static_cast<int>(EQ::versions::ClientVersion::RoF)),
 			luabind::value("RoF2", static_cast<int>(EQ::versions::ClientVersion::RoF2)),
-			luabind::value("TDS", static_cast<int>(EQ::versions::ClientVersion::TDS))
+			luabind::value("SixtyFourBit", static_cast<int>(EQ::versions::ClientVersion::SixtyFourBit))
 		];
 }
 

@@ -26,7 +26,7 @@
 #include "sod.h"
 #include "rof.h"
 #include "rof2.h"
-#include "tds.h"
+#include "sixtyfourbit.h"
 
 
 void RegisterAllPatches(EQStreamIdentifier &into)
@@ -37,7 +37,7 @@ void RegisterAllPatches(EQStreamIdentifier &into)
 	UF::Register(into);
 	RoF::Register(into);
 	RoF2::Register(into);
-	TDS::Register(into);
+	SixtyFourBit::Register(into);
 }
 
 void ReloadAllPatches()
@@ -48,5 +48,5 @@ void ReloadAllPatches()
 	UF::Reload();
 	RoF::Reload();
 	RoF2::Reload();
-	TDS::Reload();
+	SixtyFourBit::Reload();
 }

@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../common/patches/uf_constants.h"
 #include "../common/patches/rof_constants.h"
 #include "../common/patches/rof2_constants.h"
-#include "../common/patches/tds_constants.h"
+#include "../common/patches/sixtyfourbit_constants.h"
 
 // *** DO NOT CHANGE without a full understanding of the consequences..the server is set up to use these settings explicitly!! ***
 // *** You will cause compilation failures and corrupt your database if partial or incorrect attempts to change them are made!! ***
@@ -48,7 +48,7 @@ class EmuConstants
 	// an immutable value is required to initialize arrays, etc... use this class as a repository for those
 public:
 	// database
-	static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::TDS; // adjust according to starting item placement and target client
+	static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::SixtyFourBit; // adjust according to starting item placement and target client
 
 	static const size_t CHARACTER_CREATION_LIMIT = TDS::consts::CHARACTER_CREATION_LIMIT;
 
