@@ -1374,7 +1374,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 		{ EQ::versions::ClientVersion::SoD, 0 },
 		{ EQ::versions::ClientVersion::UF, 0 },
 		{ EQ::versions::ClientVersion::RoF, 0 },
-		{ EQ::versions::ClientVersion::RoF2, 0 }
+		{ EQ::versions::ClientVersion::RoF2, 0 },
 		{ EQ::versions::ClientVersion::SixtyFourBit, 0 }
 	};
 
