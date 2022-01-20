@@ -1054,8 +1054,10 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_lo
 			out.WriteInt32(LS::ServerTypeFlags::Standard);
 			break;
 	}
-
-	out.WriteUInt32(GetServerId());
+	int serverId = GetServerId(); // one of these is actually it, needs testing
+	out.WriteUInt32(serverId);
+	out.WriteUInt32(serverId);
+	out.WriteUInt32(serverId);
 	out.WriteString(GetServerLongName());
 	out.WriteString("us"); // country code
 	out.WriteString("en"); // language code

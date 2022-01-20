@@ -233,13 +233,12 @@ namespace SixtyFourBit
 		struct CharacterSelectEntry_Struct
 		{
 			/*0000*/	char Name[1];				// Name null terminated
-			/*0000*/	uint8 Class;
-			/*0000*/	uint32 Race;
-			/*0000*/	uint8 Level;
-			/*0000*/	uint8 ShroudClass;
+			/*0004*/	uint32 Class;
+			/*0008*/	uint32 Race;
+			/*0012*/	uint8 Level;
+			/*0000*/	uint32 ShroudClass;
 			/*0000*/	uint32 ShroudRace;
-			/*0000*/	uint16 Zone;
-			/*0000*/	uint16 Instance;
+			/*0000*/	uint32 Zone;
 			/*0000*/	uint8 Gender;
 			/*0000*/	uint8 Face;
 			/*0000*/	CharSelectEquip	Equip[9];
@@ -263,6 +262,8 @@ namespace SixtyFourBit
 			/*0000*/	uint8 Enabled;				// Swapped position with 'GoHome' 02/23/2015
 			/*0000*/	uint32 LastLogin;
 			/*0000*/	uint8 Unknown2;				// Seen 0
+			/*0000*/	uint8 Unknown3;				// Seen 0
+			/*0000*/	uint8 Unknown4;				// Seen 0
 		};
 
 		/*
