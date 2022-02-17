@@ -159,9 +159,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]",
 		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
-	if(casting_spell_id == spell_id)
+	if (casting_spell_id == spell_id) {
 		ZeroCastingVars();
-
+	}
 	if
 	(
 		!IsValidSpell(spell_id) ||
@@ -216,8 +216,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return(false);
 	}
 
-	//cannot cast under divine aura
-	if(DivineAura()) {
+	//cannot cast under divine aura, unless spell has 'cast_not_standing' flag. 
+	if(DivineAura() && !spells[spell_id].cast_not_standing) {
 		LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 		InterruptSpell(173, 0x121, false);
 		if(IsClient()) {
@@ -240,7 +240,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		if ((item_slot != -1 && cast_time == 0) || aa_id) {
 			can_send_spellbar_enable = false;
 		}
-
 		if (can_send_spellbar_enable) {
 			SendSpellBarEnable(spell_id);
 		}
@@ -620,15 +619,30 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
  * it's probably doing something wrong.
  */
 
-bool Mob::DoCastingChecks()
+bool Mob::DoCastingChecks(int32 spell_id, uint16 target_id)
 {
 	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
 		casting_spell_checks = true;
 		return true;
 	}
 
-	uint16 spell_id = casting_spell_id;
-	Mob *spell_target = entity_list.GetMob(casting_spell_targetid);
+	bool ignore_casting_spell_checks = false;
+	/*
+		If variables are passed into this function it is NOT being called from main spell process
+		thefore we do not want to set the 'casting_spell_checks' state keeping variable.
+	*/
+	if (spell_id != SPELL_UNKNOWN || target_id) {
+		ignore_casting_spell_checks = true;
+	}
+
+	if (spell_id == SPELL_UNKNOWN) {
+		spell_id = casting_spell_id;
+	}
+	if (!target_id) {
+		target_id = casting_spell_targetid;
+	}
+
+	Mob *spell_target = entity_list.GetMob(target_id);
 
 	if (RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
@@ -665,7 +679,9 @@ bool Mob::DoCastingChecks()
 		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id))
 			return false;
 
-	casting_spell_checks = true;
+	if (!ignore_casting_spell_checks){
+		casting_spell_checks = true;
+	}
 	return true;
 }
 
@@ -2143,7 +2159,8 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // we can't interrupt in this, or anything called from this!
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
-						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override)
+						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
+						uint32 timer, uint32 timer_duration)
 {
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
@@ -2567,6 +2584,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	//set our reuse timer on long ass reuse_time spells...
 	if(IsClient() && !isproc)
 	{
+		//Support for bards to get disc recast timers while singing.
+		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+			CastToClient()->GetPTimers().Start(timer, timer_duration);
+			LogSpells("Spell [{}]: Setting bard custom disciple reuse timer [{}] to [{}]", spell_id, timer, timer_duration);
+		}
+
 		if(casting_spell_aa_id) {
 			AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
 
@@ -3640,10 +3663,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		return false;
 	}
 
-	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
+	if (spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn()) {
 		return false;
+	}
 
-	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) {
+	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id) && !IsEffectInSpell(spell_id, SE_BindSight)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
 			return false;
@@ -3765,8 +3789,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
-	// invuln mobs can't be affected by any spells, good or bad
-	if(spelltar->GetInvul() || spelltar->DivineAura()) {
+	// invuln mobs can't be affected by any spells, good or bad, except if caster is casting a spell with 'cast_not_standing' on self.
+	if ((spelltar->GetInvul() && !spelltar->DivineAura()) ||
+		(spelltar != this && spelltar->DivineAura()) ||
+		(spelltar == this && spelltar->DivineAura() && !spells[spell_id].cast_not_standing)) {
 		LogSpells("Casting spell [{}] on [{}] aborted: they are invulnerable", spell_id, spelltar->GetName());
 		safe_delete(action_packet);
 		return false;
@@ -3910,7 +3936,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 				}
 			}
 		}
-		else if	( !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) // Detrimental spells - PVP check
+		else if	( !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id) && !IsEffectInSpell(spell_id, SE_BindSight)) // Detrimental spells - PVP check
 		{
 			LogSpells("Detrimental spell [{}] can't take hold [{}] -> [{}]", spell_id, GetName(), spelltar->GetName());
 			spelltar->MessageString(Chat::SpellFailure, YOU_ARE_PROTECTED, GetCleanName());
@@ -4209,7 +4235,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 				spelltar->CastToClient()->cheat_manager.SetExemptStatus(KnockBack, true);
 			}
 		}
-		else if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
+		else if (RuleB(Spells, NPCSpellPush) && !permarooted && !IsPseudoRooted() && spelltar->ForcedMovement == 0) {
 			spelltar->m_Delta.x += action->force * g_Math.FastSin(action->hit_heading);
 			spelltar->m_Delta.y += action->force * g_Math.FastCos(action->hit_heading);
 			spelltar->m_Delta.z += action->hit_pitch;
@@ -6256,6 +6282,22 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 
 	app.priority = 1;
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
+}
+
+void Client::SendItemRecastTimer(uint32 recast_type, uint32 recast_delay)
+{
+	if (!recast_delay) {
+		recast_delay = GetPTimers().GetRemainingTime(pTimerItemStart + recast_type);
+	}
+
+	if (recast_delay) {
+		auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
+		ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
+		ird->recast_delay = recast_delay;
+		ird->recast_type = recast_type;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ)
