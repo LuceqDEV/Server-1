@@ -1043,6 +1043,7 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_lo
 		out.WriteString(GetRemoteIP());
 	}
 
+	out.WriteUInt32(9000);
 	switch (GetServerListID()) {
 		case LS::ServerType::Legends:
 			out.WriteInt32(LS::ServerTypeFlags::Legends);
@@ -1055,7 +1056,6 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_lo
 			break;
 	}
 	int serverId = GetServerId(); // one of these is actually it, needs testing
-	out.WriteUInt32(serverId);
 	out.WriteUInt32(serverId);
 	out.WriteUInt32(serverId);
 	out.WriteString(GetServerLongName());
