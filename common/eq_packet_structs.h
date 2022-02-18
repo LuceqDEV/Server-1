@@ -5252,6 +5252,7 @@ struct MaxCharacters_Struct
 /*000*/ uint32 max_chars;	// Seen 4 on Silver Account (4 characters max)
 /*004*/ uint32 unknown004;	// Seen 0
 /*008*/ uint32 unknown008;	// Seen 0
+/*008*/ char unknowns[28];	// Seen 00 01 00 00 00 00 00 00 00 00 00 00 ff ff ff ff 00 00 00 00 00 00 00 00 00 00 00 00
 };
 
 struct Membership_Struct
@@ -5260,7 +5261,7 @@ struct Membership_Struct
 /*004*/ uint32 races;	// Seen ff ff 01 00
 /*008*/ uint32 classes;	// Seen ff ff 01 01
 /*012*/ uint32 entrysize; // Seen 15 00 00 00
-/*016*/ int32 entries[21]; //Varies. Seen ff ff ff ff, and 01 00 00 00
+/*016*/ int32 entries[31]; //Varies. Seen ff ff ff ff, and 01 00 00 00
 /*104*/ uint32 exit_url_length;	// Length of the exit_url string (0 for none)
 /*108*/ // char exit_url[0];	// URL that will open when EQ is exited
 };

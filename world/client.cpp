@@ -174,10 +174,19 @@ void Client::SendEnterWorld(std::string name)
 		}
 	}
 
-	auto outapp = new EQApplicationPacket(OP_EnterWorld, strlen(char_name) + 1);
-	memcpy(outapp->pBuffer,char_name,strlen(char_name)+1);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	if (strlen(char_name) > 0)
+	{
+		auto outapp = new EQApplicationPacket(OP_EnterWorld, strlen(char_name) + 1);
+		memcpy(outapp->pBuffer, char_name, strlen(char_name) + 1);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+	else
+	{
+		auto outapp = new EQApplicationPacket(OP_EnterWorld, 0);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void Client::SendExpansionInfo() {
@@ -401,7 +410,7 @@ void Client::SendMembershipSettings() {
 
 void Client::SendPostEnterWorld() {
 	auto outapp = new EQApplicationPacket(OP_PostEnterWorld, 1);
-	outapp->size=0;
+	outapp->pBuffer[0] = 0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -484,13 +493,14 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 
 		SendLogServer();
 		SendApproveWorld();
-		SendEnterWorld(cle->name());
 		SendPostEnterWorld();
 		if (!is_player_zoning) {
 			SendExpansionInfo();
 			SendCharInfo();
 			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
 		}
+
+		SendEnterWorld(cle->name());
 
 		cle->SetIP(GetIP());
 		return true;

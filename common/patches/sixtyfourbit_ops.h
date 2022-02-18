@@ -148,6 +148,7 @@ E(OP_ZonePlayerToBind)
 E(OP_ZoneServerInfo)
 E(OP_ZoneSpawns)
 E(OP_CrystalCountUpdate)
+E(OP_SendMaxCharacters)
 // Begin RoF Decodes
 D(OP_AdventureMerchantSell)
 D(OP_AltCurrencySell)

@@ -167,7 +167,7 @@ namespace SixtyFourBit
 		ENCODE_LENGTH_EXACT(Membership_Details_Struct);
 		SETUP_DIRECT_ENCODE(Membership_Details_Struct, structs::Membership_Details_Struct);
 
-		eq->membership_setting_count = 72;
+		eq->membership_setting_count = 96;
 		for (uint32 i = 0; i < emu->membership_setting_count; ++i) // 66
 		{
 			OUT(settings[i].setting_index);
@@ -204,7 +204,7 @@ namespace SixtyFourBit
 		eq->membership = emu->membership;
 		eq->races = emu->races;
 		eq->classes = emu->classes;
-		eq->entrysize = 25; //emu->entrysize;
+		eq->entrysize = 31; //emu->entrysize;
 
 		for (uint32 i = 0; i < emu->entrysize; ++i) // 21
 		{
@@ -213,7 +213,7 @@ namespace SixtyFourBit
 		// Last 4 new entries are 0s on Live Silver as of 12/29/14
 		// Setting them each to 1 for now.
 		// This removes the "Buy Now" button from aug type 21 slots on items.
-		for (uint32 i = 21; i < 25; ++i) // 4
+		for (uint32 i = 21; i < 31; ++i) // 4
 		{
 			eq->entries[i] = 1;
 		}
@@ -2925,6 +2925,16 @@ namespace SixtyFourBit
 			
 		dest->FastQueuePacket(&outapp);
 		delete inapp;
+	}
+
+
+	ENCODE(OP_SendMaxCharacters)
+	{
+			ENCODE_LENGTH_EXACT(MaxCharacters_Struct);
+			SETUP_DIRECT_ENCODE(MaxCharacters_Struct, structs::MaxCharacters_Struct);
+			eq->max_chars = emu->max_chars;
+			eq->unknown012 = 3; // seen 3
+			FINISH_ENCODE();
 	}
 
 	ENCODE(OP_SendCharInfo)

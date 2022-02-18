@@ -232,30 +232,31 @@ namespace SixtyFourBit
 
 		struct CharacterSelectEntry_Struct
 		{
-			/*0000*/	char Name[1];				// Name null terminated
-			/*0004*/	uint32 Class;
-			/*0008*/	uint32 Race;
-			/*0012*/	uint8 Level;
-			/*0000*/	uint32 ShroudClass;
-			/*0000*/	uint32 ShroudRace;
-			/*0000*/	uint32 Zone;
-			/*0000*/	uint8 Gender;
-			/*0000*/	uint8 Face;
-			/*0000*/	CharSelectEquip	Equip[9];
-			/*0000*/	uint8 Unknown15;			// Seen FF
-			/*0000*/	uint8 Unknown19;			// Seen FF
-			/*0000*/	uint32 DrakkinTattoo;
-			/*0000*/	uint32 DrakkinDetails;
-			/*0000*/	uint32 Deity;
-			/*0000*/	uint32 PrimaryIDFile;
-			/*0000*/	uint32 SecondaryIDFile;
-			/*0000*/	uint8 HairColor;
-			/*0000*/	uint8 BeardColor;
-			/*0000*/	uint8 EyeColor1;
-			/*0000*/	uint8 EyeColor2;
-			/*0000*/	uint8 HairStyle;
-			/*0000*/	uint8 Beard;
-			/*0000*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
+			/*0004*/	char Name[1];				// Name null terminated
+			/*0012*/	uint32 Class;
+			/*0016*/	uint32 Race;
+			/*0017*/	uint8 Level;
+			/*0021*/	uint32 ShroudClass;
+			/*0025*/	uint32 ShroudRace;
+			/*0029*/	uint16 Zone;
+			/*0031*/	uint16 InstanceId;
+			/*0033*/	uint8 Gender;
+			/*0034*/	uint8 Face;
+			/*0035*/	CharSelectEquip	Equip[9];
+			/*0215*/	uint8 Unknown15;			// Seen FF
+			/*0216*/	uint8 Unknown19;			// Seen FF
+			/*0217*/	uint32 DrakkinTattoo;
+			/*0221*/	uint32 DrakkinDetails;
+			/*0225*/	uint32 Deity;
+			/*0229*/	uint32 PrimaryIDFile;
+			/*0233*/	uint32 SecondaryIDFile;
+			/*0239*/	uint8 HairColor;
+			/*0240*/	uint8 BeardColor;
+			/*0241*/	uint8 EyeColor1;
+			/*0242*/	uint8 EyeColor2;
+			/*0243*/	uint8 HairStyle;
+			/*0244*/	uint8 Beard;
+			/*0245*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
 			/*0000*/	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
 			/*0000*/	uint32 DrakkinHeritage;
 			/*0000*/	uint8 Unknown1;				// Seen 0
@@ -264,6 +265,8 @@ namespace SixtyFourBit
 			/*0000*/	uint8 Unknown2;				// Seen 0
 			/*0000*/	uint8 Unknown3;				// Seen 0
 			/*0000*/	uint8 Unknown4;				// Seen 0
+			/*0000*/	uint32 Unknown5;				// Seen 65 1e 0d 00
+			/*0000*/	uint32 Unknown6;				// Seen 9e 00 00 00
 		};
 
 		/*
@@ -294,7 +297,7 @@ namespace SixtyFourBit
 		struct Membership_Details_Struct
 		{
 			/*0000*/ uint32 membership_setting_count;	// Seen 66
-			/*0016*/ Membership_Setting_Struct settings[72]; // 864 Bytes
+			/*0016*/ Membership_Setting_Struct settings[96]; // 864 Bytes
 			/*0012*/ uint32 race_entry_count;	// Seen 15
 			/*1044*/ Membership_Entry_Struct membership_races[15]; // 120 Bytes
 			/*0012*/ uint32 class_entry_count;	// Seen 15
@@ -307,11 +310,11 @@ namespace SixtyFourBit
 
 		struct Membership_Struct
 		{
-			/*000*/ uint32 membership;	// Seen 2 on Gold Account
+			/*000*/ uint8 membership;	// Seen 1 on Free
 			/*004*/ uint32 races;	// Seen ff ff 01 00
 			/*008*/ uint32 classes;	// Seen ff ff 01 01
 			/*012*/ uint32 entrysize; // Seen 22
-			/*016*/ int32 entries[25]; // Most -1, 1, and 0 for Gold Status
+			/*016*/ int32 entries[31]; // Most -1, 1, and 0 for Gold Status
 			/*104*/
 		};
 
@@ -5053,6 +5056,7 @@ namespace SixtyFourBit
 			/*000*/ uint32 max_chars;	// Seen 4 on Silver Account (4 chars max)
 			/*004*/ uint32 unknown004;	// Seen 0
 			/*008*/ uint32 unknown008;	// Seen 0
+			/*012*/ uint32 unknown012;	// Seen 3
 		};
 
 		// Used by MercenaryListEntry_Struct
