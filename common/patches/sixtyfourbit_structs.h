@@ -262,7 +262,6 @@ namespace SixtyFourBit
 			/*0000*/	uint8 Unknown1;				// Seen 0
 			/*0000*/	uint8 Enabled;				// Swapped position with 'GoHome' 02/23/2015
 			/*0000*/	uint32 LastLogin;
-			/*0000*/	uint8 Unknown2;				// Seen 0
 			/*0000*/	uint8 Unknown3;				// Seen 0
 			/*0000*/	uint8 Unknown4;				// Seen 0
 			/*0000*/	uint32 Unknown5;				// Seen 65 1e 0d 00

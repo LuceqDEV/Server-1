@@ -2996,7 +2996,8 @@ namespace SixtyFourBit
 			eq_cse->Level = emu_cse->Level;
 			eq_cse->ShroudClass = emu_cse->ShroudClass;
 			eq_cse->ShroudRace = emu_cse->ShroudRace;
-			eq_cse->Zone = emu_cse->Zone;
+			eq_cse->Zone = (uint16)emu_cse->Zone;
+			eq_cse->InstanceId = 0;
 			eq_cse->Gender = emu_cse->Gender;
 			eq_cse->Face = emu_cse->Face;
 
@@ -3028,7 +3029,6 @@ namespace SixtyFourBit
 			eq_cse->Unknown1 = emu_cse->Unknown1;
 			eq_cse->Enabled = emu_cse->Enabled;
 			eq_cse->LastLogin = emu_cse->LastLogin;
-			eq_cse->Unknown2 = emu_cse->Unknown2;
 			eq_cse->Unknown3 = 0;
 			eq_cse->Unknown4 = 0;
 
