@@ -265,7 +265,8 @@ namespace SixtyFourBit
 			/*0000*/	uint8 Unknown3;				// Seen 0
 			/*0000*/	uint8 Unknown4;				// Seen 0
 			/*0000*/	uint32 Unknown5;				// Seen 65 1e 0d 00
-			/*0000*/	uint32 Unknown6;				// Seen 9e 00 00 00
+			/*0000*/	uint8 Unknown6;				// Seen 0
+			/*0000*/	uint32 Unknown7;				// Seen 9e 00 00 00
 		};
 
 		/*

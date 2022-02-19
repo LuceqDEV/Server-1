@@ -2099,7 +2099,7 @@ namespace SixtyFourBit
 		outapp->WriteUInt8(1);			// Unknown 1
 		outapp->WriteUInt8(0xff);		// Unknown 0xff
 		outapp->WriteUInt8(1);			// Unknown 1
-		outapp->WriteFloat(5.0f);		// Height
+		outapp->WriteFloat(5.0f);		// Size
 		outapp->WriteFloat(3.0f);		// Unknown 3.0
 		outapp->WriteFloat(2.5f);		// Unknown 2.5
 		outapp->WriteFloat(5.5f);		// Unknown 5.5
@@ -2168,9 +2168,9 @@ namespace SixtyFourBit
 			outapp->WriteUInt32(0);
 		}
 
-		outapp->WriteUInt32(20);			// Timestamp count
+		outapp->WriteUInt32(25);			// Timestamp count
 
-		for (uint32 r = 0; r < 20; r++)
+		for (uint32 r = 0; r < 25; r++)
 		{
 			outapp->WriteUInt32(0);
 		}
