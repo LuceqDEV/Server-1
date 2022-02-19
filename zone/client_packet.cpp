@@ -453,10 +453,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	}
 
 	if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)
-		Log(Logs::General, Logs::PacketClientServer, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
+		Log(Logs::General, Logs::PacketClientServer, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), (uint32)app->GetOpcode(), (uint32)app->Size());
 
 	if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)
-		Log(Logs::General, Logs::PacketClientServerWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+		Log(Logs::General, Logs::PacketClientServerWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), (uint32)app->GetOpcode(), (uint32)app->Size(), DumpPacketToString(app).c_str());
 
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {

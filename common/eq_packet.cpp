@@ -136,6 +136,11 @@ void EQApplicationPacket::build_header_dump(char *buffer) const
 #endif
 }
 
+void EQApplicationPacket::build_static_opcode_header_dump(char* buffer, uint16 opcode) const
+{
+	sprintf(buffer, "[OpCode %s(0x%04x) Size=%u]", OpcodeManager::EmuToName(emu_opcode), opcode, size);
+}
+
 void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
 	if (src_ip) {

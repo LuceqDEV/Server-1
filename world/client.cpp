@@ -27,6 +27,7 @@
 #include "../common/eq_stream_intf.h"
 #include "../common/inventory_profile.h"
 #include "../common/races.h"
+#include "../common/opcodemgr.h"
 #include "../common/classes.h"
 #include "../common/languages.h"
 #include "../common/skills.h"
@@ -174,19 +175,10 @@ void Client::SendEnterWorld(std::string name)
 		}
 	}
 
-	if (strlen(char_name) > 0)
-	{
-		auto outapp = new EQApplicationPacket(OP_EnterWorld, strlen(char_name) + 1);
-		memcpy(outapp->pBuffer, char_name, strlen(char_name) + 1);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	else
-	{
-		auto outapp = new EQApplicationPacket(OP_EnterWorld, 0);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
+	auto outapp = new EQApplicationPacket(OP_EnterWorld, strlen(char_name) + 1);
+	memcpy(outapp->pBuffer, char_name, strlen(char_name) + 1);
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::SendExpansionInfo() {
@@ -450,15 +442,15 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		LogClientLogin("[HandleSendLoginInfoPacket] Checking Auth id [{}] passed", id);
 		if (!is_player_zoning) {
 			// Track who is in and who is out of the game
-			char *inout= (char *) "";
+			char* inout = (char*)"";
 
-			if (cle->GetOnline() == CLE_Status::Never){
+			if (cle->GetOnline() == CLE_Status::Never) {
 				// Desktop -> Char Select
-				inout = (char *) "In";
+				inout = (char*)"In";
 			}
 			else {
 				// Game -> Char Select
-				inout=(char *) "Out";
+				inout = (char*)"Out";
 			}
 
 			// Always at Char select at this point.
@@ -473,16 +465,16 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			cle->SetOnline();
 		}
 
-		const WorldConfig *Config=WorldConfig::get();
+		const WorldConfig* Config = WorldConfig::get();
 
-		if(Config->UpdateStats) {
+		if (Config->UpdateStats) {
 			auto pack = new ServerPacket;
 			pack->opcode = ServerOP_LSPlayerJoinWorld;
 			pack->size = sizeof(ServerLSPlayerJoinWorld_Struct);
 			pack->pBuffer = new uchar[pack->size];
-			memset(pack->pBuffer,0,pack->size);
-			ServerLSPlayerJoinWorld_Struct* join =(ServerLSPlayerJoinWorld_Struct*)pack->pBuffer;
-			strcpy(join->key,GetLSKey());
+			memset(pack->pBuffer, 0, pack->size);
+			ServerLSPlayerJoinWorld_Struct* join = (ServerLSPlayerJoinWorld_Struct*)pack->pBuffer;
+			strcpy(join->key, GetLSKey());
 			join->lsaccount_id = GetLSID();
 			loginserverlist.SendPacket(pack);
 			safe_delete(pack);
@@ -499,9 +491,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			SendCharInfo();
 			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
 		}
-
 		SendEnterWorld(cle->name());
-
 		cle->SetIP(GetIP());
 		return true;
 	}
@@ -997,7 +987,12 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	EmuOpcode opcode = app->GetOpcode();
 
-	LogNetcode("Received EQApplicationPacket [{:#04x}]", opcode);
+	if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)
+	{
+			char buffer[64];
+			app->build_header_dump(buffer);
+			Log(Logs::General, Logs::PacketClientServerWithDump, "%s %s", buffer, DumpPacketToString(app).c_str());
+	}
 
 	if (!eqs->CheckState(ESTABLISHED)) {
 		LogInfo("Client disconnected (net inactive on send)");
@@ -1093,7 +1088,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		default:
 		{
-			LogNetcode("Received unknown EQApplicationPacket");
+			if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
+				char buffer[64];
+				app->build_header_dump(buffer);
+				Log(Logs::General, Logs::PacketClientServerUnhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
+			}
 			return true;
 		}
 	}

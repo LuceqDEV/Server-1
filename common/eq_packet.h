@@ -115,6 +115,7 @@ public:
 
 	virtual void build_raw_header_dump(char *buffer, uint16 seq=0xffff) const;
 	virtual void build_header_dump(char *buffer) const;
+	virtual void build_static_opcode_header_dump(char* buffer, uint16 opcode) const;
 	virtual void DumpRawHeader(uint16 seq=0xffff, FILE *to = stdout) const;
 	virtual void DumpRawHeaderNoTime(uint16 seq=0xffff, FILE *to = stdout) const;
 

@@ -41,11 +41,6 @@ void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
 	if(p == nullptr)
 		return;
 
-	if (p->GetOpcode() != OP_SpecialMesg) {
-		Log(Logs::General, Logs::PacketServerClient, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size());
-		Log(Logs::General, Logs::PacketServerClientWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
-	}
-
 	EQApplicationPacket *newp = p->Copy();
 	FastQueuePacket(&newp, ack_req);
 }

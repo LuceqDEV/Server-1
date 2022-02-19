@@ -65,6 +65,7 @@ EQ::Net::EQStream::~EQStream()
 }
 
 void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
+
 	if (m_opcode_manager && *m_opcode_manager) {
 		uint16 opcode = 0;
 		if (p->GetOpcodeBypass() != 0) {
@@ -73,6 +74,13 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 		else {
 			m_packet_sent_count[static_cast<int>(p->GetOpcode())]++; //Wont bother with bypass tracking of these since those are rare for testing anyway
 			opcode = (*m_opcode_manager)->EmuToEQ(p->GetOpcode());
+		}
+
+		if (LogSys.log_settings[Logs::PacketServerClientWithDump].is_category_enabled == 1)
+		{
+			char buffer[64];
+			p->build_static_opcode_header_dump(buffer, opcode);
+			Log(Logs::General, Logs::PacketServerClientWithDump, "%s %s", buffer, DumpPacketToString(p).c_str());
 		}
 
 		EQ::Net::DynamicPacket out;
