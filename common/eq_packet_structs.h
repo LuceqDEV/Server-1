@@ -5261,7 +5261,7 @@ struct Membership_Struct
 /*004*/ uint32 races;	// Seen ff ff 01 00
 /*008*/ uint32 classes;	// Seen ff ff 01 01
 /*012*/ uint32 entrysize; // Seen 15 00 00 00
-/*016*/ int32 entries[31]; //Varies. Seen ff ff ff ff, and 01 00 00 00
+/*016*/ int32 entries[25]; //Varies. Seen ff ff ff ff, and 01 00 00 00
 /*104*/ uint32 exit_url_length;	// Length of the exit_url string (0 for none)
 /*108*/ // char exit_url[0];	// URL that will open when EQ is exited
 };
