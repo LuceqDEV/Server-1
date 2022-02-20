@@ -4,121 +4,86 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using SharpPcap;
-using EQApplicationLayer;
+using EQExtractor2.Domain;
 
 namespace EQExtractor2
 {
+    public delegate void LogCallback(string message);
+
+    /// <summary>
+    /// Main GUI form. Wherever possible, please add non-UI code to Domain/
+    /// </summary>
+    /// 
     public partial class EQExtractor2Form1 : Form
     {
-        string Version = "EQExtractor2 Version 2.6.4 GIT";
+        #if DEBUG
+        private const string _configuration = "(Debug Build)";
+        #else 
+        private const string _configuration = "(Release Build)";
+        #endif
 
-        static int PacketsSeen = 0;
-        static long BytesRead = 0;
-        static long CaptureFileSize = 0;
-        string ZoneName;
-        string SpawnNameFilter = "";
-        bool CoalesceWaypoints = true;
+        private const int PacketsSeen = 0;
+        string _zoneName=string.Empty;
 
-        GenerateSQLForm SQLForm = new GenerateSQLForm();
-        LogForm DebugLog = new LogForm();
-        UserOptions Options = new UserOptions();
+        readonly GenerateSQLForm _sqlForm = new GenerateSQLForm();
+        readonly LogForm _debugLog = new LogForm();
+        readonly UserOptions _options = new UserOptions();
 
-        StreamWriter SQLStream;
+
         StreamWriter PacketDebugStream;
-
-        EQStreamProcessor StreamProcessor;
+        private PCapProcessor _processor;
+        private readonly string _versionText = string.Empty;
 
         public EQExtractor2Form1()
         {
+            _versionText = string.Format("EQExtractor2 Version {0} {1}", GetType().Assembly.GetName().Version,_configuration);
             InitializeComponent();
             DisplayUsageInfo();
-
-            Options.PacketDumpViewerProgram.Text = Properties.Settings.Default.TextFileViewer;
-            Options.ShowDebugWindowOnStartup.Checked = Properties.Settings.Default.ShowDebugWindowOnStartup;
-            Options.ShowTimeStamps.Checked = Properties.Settings.Default.DumpTimeStamps;
-
+            _options.PacketDumpViewerProgram.Text = Properties.Settings.Default.TextFileViewer;
+            _options.ShowDebugWindowOnStartup.Checked = Properties.Settings.Default.ShowDebugWindowOnStartup;
+            _options.ShowTimeStamps.Checked = Properties.Settings.Default.DumpTimeStamps;
         }
 
-        public void Log(string Message)
+        
+        public void Log(string message)
         {
-            DebugLog.ConsoleWindow.Items.Add(Message);
-            DebugLog.ConsoleWindow.SelectedIndex = DebugLog.ConsoleWindow.Items.Count - 1;
-            Application.DoEvents();
-        }
-
-        private void device_OnPacketArrival(object sender, SharpPcap.CaptureEventArgs e)
-        {
-            if (e.Packet.LinkLayerType == PacketDotNet.LinkLayers.Ethernet)
+            if (InvokeRequired)
             {
-                PacketDotNet.Packet packet;
-
-                long TotalPacketSize = e.Packet.Data.Length;
-                BytesRead += TotalPacketSize;
-                ++PacketsSeen;
-
-                if ((PacketsSeen > 0) && ((PacketsSeen % 10000) == 0))
-                {
-                    DebugLog.ConsoleWindow.SelectedIndex = DebugLog.ConsoleWindow.Items.Count - 1;
-                    int Progress = (int)((float)BytesRead / (float)CaptureFileSize * 100);
-                    ProgressBar.Value = Progress;
-
-                    Application.DoEvents();
-                }
-
-                try
-                {
-                    packet = PacketDotNet.Packet.ParsePacket(e.Packet);
-                }
-                catch
-                {
-                    return;
-                }
-
-                var ethernetPacket = (PacketDotNet.EthernetPacket)packet;
-
-                var udpPacket = PacketDotNet.UdpPacket.GetEncapsulated(packet);
-
-                if (udpPacket != null)
-                {
-                    var ipPacket = (PacketDotNet.IpPacket)udpPacket.ParentPacket;
-                    System.Net.IPAddress srcIp = ipPacket.SourceAddress;
-                    System.Net.IPAddress dstIp = ipPacket.DestinationAddress;
-
-                    byte[] Payload = udpPacket.PayloadData;
-
-                    Int32 l = udpPacket.Length - udpPacket.Header.GetLength(0);
-
-                    if (l > 0)
-                    {
-                        Array.Resize(ref Payload, l);
-
-                        StreamProcessor.ProcessPacket(srcIp, dstIp, udpPacket.SourcePort, udpPacket.DestinationPort, Payload, packet.Timeval.Date);
-                    }
-                }
+                LogCallback d = Log;
+                Invoke(d, new object[] {message});
+            }
+            else
+            {
+                if(!string.IsNullOrEmpty(message))_debugLog.ConsoleWindow.Items.Add(message);
+                _debugLog.ConsoleWindow.SelectedIndex = _debugLog.ConsoleWindow.Items.Count - 1;
+                Application.DoEvents();
+            }
+        }
+        public void SetStatus(string message)
+        {
+            if (InvokeRequired)
+            {
+                LogCallback d = SetStatus;
+                Invoke(d, new object[] { message });
+            }
+            else
+            {
+                StatusBar.Text = message;
             }
         }
 
-        public void WriteSQL(string Message)
+        public void PacketDebugLogger(string message)
         {
-            SQLStream.WriteLine(Message);
-         }
-
-        public void PacketDebugLogger(string Message)
-        {
-            PacketDebugStream.WriteLine(Message);
+            PacketDebugStream.WriteLine(message);
         }
 
         private void DisableAllControls()
         {
-            foreach (Control c in this.Controls)
+            foreach (Control c in Controls)
             {
                 if ((c is Button) || (c is TextBox) || (c is MaskedTextBox) || (c is CheckBox))
                     c.Enabled = false;
@@ -128,11 +93,11 @@ namespace EQExtractor2
 
         private void EnableAllControls()
         {
-            foreach (Control c in this.Controls)
+            foreach (Control c in Controls)
                 c.Enabled = true;
 
-            menuGenerateSQL.Enabled = StreamProcessor.StreamRecognised() && StreamProcessor.SupportsSQLGeneration();
-            menuDumpAAs.Enabled = StreamProcessor.StreamRecognised();
+            menuGenerateSQL.Enabled =_processor!=null && _processor.StreamProcessor.StreamRecognised() && _processor.StreamProcessor.SupportsSQLGeneration();
+            menuDumpAAs.Enabled = _processor != null && _processor.StreamProcessor.StreamRecognised();
         }
 
         private void menuLoadPCAP_Click(object sender, EventArgs e)
@@ -145,97 +110,66 @@ namespace EQExtractor2
             menuViewPackets.Enabled = false;
             menuDumpAAs.Enabled = false;
 
-            SharpPcap.OfflinePcapDevice device;
+            var bw = new BackgroundWorker {WorkerReportsProgress = true};
+            bw.DoWork += ProcessPCapFile;
+            bw.RunWorkerCompleted += OnProcessPCapFileCompleted;
+            bw.RunWorkerAsync(InputFileOpenDialog.FileName);
 
-            try
-            {
-                string CapFile = InputFileOpenDialog.FileName;
+        }
 
-                device = new SharpPcap.OfflinePcapDevice(CapFile);
+   
+        private void ProcessPCapFile(object sender, DoWorkEventArgs e)
+        {
+            var capFile = e.Argument as string;
+            if (string.IsNullOrEmpty(capFile)) return;
+            var bw = sender as BackgroundWorker;
+            if (bw == null) throw new ArgumentNullException("sender");
 
-                device.Open();
-            }
-            catch
-            {
-                StatusBar.Text = "Error: File does not exist or not in .pcap format.";
-                Log("Error: File does not exist or not in .pcap format.");
-                return;
-            }
-
-            StreamProcessor = new EQStreamProcessor();
-
-            if (!StreamProcessor.Init(Application.StartupPath, this.Log))
-            {
-                Log("Fatal error initialising Stream Processor. No decoders could be initialised (mostly likely misplaced patch_XXXX.conf files.");
-                StatusBar.Text = "Fatal error initialising Stream Processor. No decoders could be initialised (mostly likely misplaced patch_XXXX.conf files.";
-                return;
-            }
-
-            if (Options.EQPacketDebugFilename.Text.Length > 0)
+            if (_options.EQPacketDebugFilename.Text.Length > 0)
             {
                 try
                 {
-                    PacketDebugStream = new StreamWriter(Options.EQPacketDebugFilename.Text);
-                    StreamProcessor.Packets.SetDebugLogHandler(PacketDebugLogger);
+                    PacketDebugStream = new StreamWriter(_options.EQPacketDebugFilename.Text);
                 }
                 catch
                 {
                     Log("Failed to open netcode debug file for writing.");
-                    Options.EQPacketDebugFilename.Text = "";
-                    StreamProcessor.Packets.SetDebugLogHandler(null);
+                    _options.EQPacketDebugFilename.Text = "";
                 }
             }
-            else
-                StreamProcessor.Packets.SetDebugLogHandler(null);
+            _processor = new PCapProcessor(Log,PacketDebugLogger,SetStatus,bw.ReportProgress);
+            _processor.ProcessPCapFile(capFile);
+        }
 
-            StatusBar.Text = "Reading packets from " + InputFileOpenDialog.FileName + ". Please wait...";
-
-            device.OnPacketArrival +=
-                new PacketArrivalEventHandler(device_OnPacketArrival);
-
-            BytesRead = 0;
-            PacketsSeen = 0;
-
-            DebugLog.ConsoleWindow.Items.Add("-- Capturing from '" + InputFileOpenDialog.FileName);
-            ProgressBar.Value = 0;
-            ProgressBar.Show();
-
-            menuFile.Enabled = false;
-
-            CaptureFileSize = device.FileSize;
-
-            device.Capture();
-
-            device.Close();
-
-            Log("End of file reached. Processed " + PacketsSeen + " packets and " + BytesRead + " bytes.");
-
+        private void OnProcessPCapFileCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null || _processor==null) return;
             ProgressBar.Hide();
 
-            if (Options.EQPacketDebugFilename.Text.Length > 0)
+            if (_options.EQPacketDebugFilename.Text.Length > 0)
                 PacketDebugStream.Close();
 
-            PacketCountLabel.Text = PacketsSeen.ToString();
-            if (StreamProcessor.Packets.ErrorsInStream)
+            PacketCountLabel.Text = _processor.PacketsSeen.ToString();
+            if ( _processor.StreamProcessor.Packets.ErrorsInStream)
                 Log("There were errors encountered in the packet stream. Data may be incomplete.");
 
-            DebugLog.ConsoleWindow.SelectedIndex = DebugLog.ConsoleWindow.Items.Count - 1;
+            _debugLog.ConsoleWindow.SelectedIndex = _debugLog.ConsoleWindow.Items.Count - 1;
 
             menuFile.Enabled = true;
 
-            StreamProcessor.PCAPFileReadFinished();
+            _processor.StreamProcessor.PCAPFileReadFinished();
 
             menuPacketDump.Enabled = true;
 
             menuViewPackets.Enabled = true;
 
-            Log("Stream recognised as " + StreamProcessor.GetDecoderVersion());
+            Log("Stream recognised as " + _processor.StreamProcessor.GetDecoderVersion());
 
-            int PPLength = StreamProcessor.VerifyPlayerProfile();
+            var ppLength = _processor.StreamProcessor.VerifyPlayerProfile();
 
-            ClientVersionLabel.Text = StreamProcessor.GetDecoderVersion();
+            ClientVersionLabel.Text = _processor.StreamProcessor.GetDecoderVersion();
 
-            if (PPLength == 0)
+            if (ppLength == 0)
             {
                 Log("Unable to find player profile packet, or packet not of correct size.");
                 menuDumpAAs.Enabled = false;
@@ -246,181 +180,147 @@ namespace EQExtractor2
                 StatusBar.Text = "Unrecognised EQ Client Version. Press Ctrl-P to dump, or Ctrl-V to view packets.";
                 return;
             }
+            ClientVersionLabel.ForeColor = Color.Green;
+            Log("Found player profile packet of the expected length (" + ppLength + ").");
+
+            if (_processor.StreamProcessor.SupportsSQLGeneration())
+                StatusBar.Text = "Client version recognised. Press Ctrl-S to Generate SQL";
             else
-            {
-                ClientVersionLabel.ForeColor = Color.Green;
-                Log("Found player profile packet of the expected length (" + PPLength + ").");
+                StatusBar.Text = "Client version recognised. *SQL GENERATION NOT SUPPORTED FOR THIS CLIENT*";
 
-                if(StreamProcessor.SupportsSQLGeneration())
-                    StatusBar.Text = "Client version recognised. Press Ctrl-S to Generate SQL";
-                else
-                    StatusBar.Text = "Client version recognised. *SQL GENERATION NOT SUPPORTED FOR THIS CLIENT*";
-            }
+            _zoneName = _processor.StreamProcessor.GetZoneName();
 
-            ZoneName = StreamProcessor.GetZoneName();
+            UInt32 zoneNumber = _processor.StreamProcessor.GetZoneNumber();
 
-            UInt32 ZoneNumber = StreamProcessor.GetZoneNumber();
+            Log("Zonename is " + _processor.StreamProcessor.GetZoneName());
 
-            Log("Zonename is " + StreamProcessor.GetZoneName());
+            Log("Zone number is " + zoneNumber);
 
-            Log("Zone number is " + ZoneNumber);
+            ZoneLabel.Text = _processor.StreamProcessor.GetZoneLongName() + " [" + _processor.StreamProcessor.GetZoneName() + "] (" + zoneNumber.ToString() + ")";
 
-            ZoneLabel.Text = StreamProcessor.GetZoneLongName() + " [" + StreamProcessor.GetZoneName() + "] (" + ZoneNumber.ToString() + ")";
-
-            SQLForm.ZoneIDTextBox.Text = ZoneNumber.ToString();
-            SQLForm.ZoneIDTextBox.Enabled = true;
-            SQLForm.DoorsTextBox.Enabled = true;
-            SQLForm.NPCTypesTextBox.Enabled = true;
-            SQLForm.SpawnEntryTextBox.Enabled = true;
-            SQLForm.SpawnGroupTextBox.Enabled = true;
-            SQLForm.Spawn2TextBox.Enabled = true;
-            SQLForm.GridTextBox.Enabled = true;
-            SQLForm.ObjectTextBox.Enabled = true;
-            SQLForm.GroundSpawnTextBox.Enabled = true;
-            SQLForm.MerchantTextBox.Enabled = true;
-            SQLForm.VersionSelector.Enabled = true;
-            menuGenerateSQL.Enabled = StreamProcessor.SupportsSQLGeneration();
+            _sqlForm.ZoneIDTextBox.Text = zoneNumber.ToString();
+            _sqlForm.ZoneIDTextBox.Enabled = true;
+            _sqlForm.DoorsTextBox.Enabled = true;
+            _sqlForm.NPCTypesTextBox.Enabled = true;
+            _sqlForm.SpawnEntryTextBox.Enabled = true;
+            _sqlForm.SpawnGroupTextBox.Enabled = true;
+            _sqlForm.Spawn2TextBox.Enabled = true;
+            _sqlForm.GridTextBox.Enabled = true;
+            _sqlForm.ObjectTextBox.Enabled = true;
+            _sqlForm.GroundSpawnTextBox.Enabled = true;
+            _sqlForm.MerchantTextBox.Enabled = true;
+            _sqlForm.VersionSelector.Enabled = true;
+            menuGenerateSQL.Enabled = _processor.StreamProcessor.SupportsSQLGeneration();
             menuPacketDump.Enabled = true;
             menuViewPackets.Enabled = true;
             menuDumpAAs.Enabled = true;
 
-            SQLForm.RecalculateBaseInsertIDs();
+            _sqlForm.RecalculateBaseInsertIDs();
 
-            StreamProcessor.GenerateZonePointList();
+            _processor.StreamProcessor.GenerateZonePointList();
         }
+
 
         private void menuGenerateSQL_Click(object sender, EventArgs e)
         {
-            if (SQLForm.ShowDialog() != DialogResult.OK)
+            if (_sqlForm.ShowDialog() != DialogResult.OK)
                 return;
-
-            string SQLFile = SQLForm.FileName;
-
             try
             {
-                SQLStream = new StreamWriter(SQLFile);
+                var config = new SqlGeneratorConfiguration
+                {
+                    SpawnDBID = Convert.ToUInt32(_sqlForm.NPCTypesTextBox.Text),
+                    SpawnGroupID = Convert.ToUInt32(_sqlForm.SpawnGroupTextBox.Text),
+                    SpawnEntryID = Convert.ToUInt32(_sqlForm.SpawnEntryTextBox.Text),
+                    Spawn2ID = Convert.ToUInt32(_sqlForm.Spawn2TextBox.Text),
+                    GridDBID = Convert.ToUInt32(_sqlForm.GridTextBox.Text),
+                    MerchantDBID = Convert.ToUInt32(_sqlForm.MerchantTextBox.Text),
+                    DoorDBID = Convert.ToInt32(_sqlForm.DoorsTextBox.Text),
+                    GroundSpawnDBID = Convert.ToUInt32(_sqlForm.GroundSpawnTextBox.Text),
+                    ObjectDBID = Convert.ToUInt32(_sqlForm.ObjectTextBox.Text),
+                    ZoneID = Convert.ToUInt32(_sqlForm.ZoneIDTextBox.Text),
+                    SpawnNameFilter = _sqlForm.SpawnNameFilter.Text,
+                    CoalesceWaypoints = _sqlForm.CoalesceWaypoints.Checked,
+                    GenerateZone = _sqlForm.ZoneCheckBox.Checked,
+                    GenerateZonePoint = _sqlForm.ZonePointCheckBox.Checked,
+                    ZoneName = _zoneName,
+                    SpawnVersion = (UInt32)_sqlForm.VersionSelector.Value,
+                    GenerateDoors = _sqlForm.DoorCheckBox.Checked,
+                    GenerateSpawns = _sqlForm.SpawnCheckBox.Checked,
+                    GenerateGrids = _sqlForm.GridCheckBox.Checked,
+                    GenerateMerchants = _sqlForm.MerchantCheckBox.Checked,
+                    UpdateExistingNPCTypes = _sqlForm.UpdateExistingNPCTypesCheckbox.Checked,
+                    UseNPCTypesTint = _sqlForm.NPCTypesTintCheckBox.Checked,
+                    GenerateInvisibleMen = _sqlForm.InvisibleMenCheckBox.Checked,
+                    GenerateGroundSpawns = _sqlForm.GroundSpawnCheckBox.Checked,
+                    GenerateObjects = _sqlForm.ObjectCheckBox.Checked
+                };
+
+                var sqlgenerator = new SqlGenerator(_sqlForm.FileName, _processor.StreamProcessor,config,Log,SetStatus);
+                sqlgenerator.GenerateSql();
             }
-            catch
+            catch (IOException)
             {
-                Log("Unable to open file " + SQLFile + " for writing.");
-                StatusBar.Text = "Unable to open file " + SQLFile + " for writing.";
-                return;
+                Log("Unable to open file " + _sqlForm.FileName + " for writing.");
+                StatusBar.Text = "Unable to open file " + _sqlForm.FileName + " for writing.";
             }
 
-            UInt32 SpawnDBID = Convert.ToUInt32(SQLForm.NPCTypesTextBox.Text);
-            UInt32 SpawnGroupID = Convert.ToUInt32(SQLForm.SpawnGroupTextBox.Text);
-            UInt32 SpawnEntryID = Convert.ToUInt32(SQLForm.SpawnEntryTextBox.Text);
-            UInt32 Spawn2ID = Convert.ToUInt32(SQLForm.Spawn2TextBox.Text);
-            UInt32 GridDBID = Convert.ToUInt32(SQLForm.GridTextBox.Text);
-            UInt32 MerchantDBID = Convert.ToUInt32(SQLForm.MerchantTextBox.Text);
-            int DoorDBID = Convert.ToInt32(SQLForm.DoorsTextBox.Text);
-            UInt32 GroundSpawnDBID = Convert.ToUInt32(SQLForm.GroundSpawnTextBox.Text);
-            UInt32 ObjectDBID = Convert.ToUInt32(SQLForm.ObjectTextBox.Text);
-
-            UInt32 ZoneID = Convert.ToUInt32(SQLForm.ZoneIDTextBox.Text);
-
-            SpawnNameFilter = SQLForm.SpawnNameFilter.Text;
-            CoalesceWaypoints = SQLForm.CoalesceWaypoints.Checked;
-
-            WriteSQL("-- SQL created by " + Version);
-            WriteSQL("--");
-            WriteSQL("-- Using Decoder: " + StreamProcessor.GetDecoderVersion());
-            WriteSQL("--");
-            WriteSQL("-- Packets captured on " + StreamProcessor.GetCaptureStartTime().ToString());
-            WriteSQL("--");
-            WriteSQL("-- Change these variables if required");
-            WriteSQL("--");
-            WriteSQL("set @StartingNPCTypeID = " + SpawnDBID + ";");
-            WriteSQL("set @StartingSpawnGroupID = " + SpawnGroupID + ";");
-            WriteSQL("set @StartingSpawnEntryID = " + SpawnEntryID + ";");
-            WriteSQL("set @StartingSpawn2ID = " + Spawn2ID + ";");
-            WriteSQL("set @StartingGridID = " + GridDBID + ";");
-            WriteSQL("set @StartingMerchantID = " + MerchantDBID + ";");
-            WriteSQL("set @BaseDoorID = " + DoorDBID + ";");
-            WriteSQL("set @StartingGroundSpawnID = " + GroundSpawnDBID + ";");
-            WriteSQL("set @StartingObjectID = " + ObjectDBID + ";");
-            WriteSQL("--");
-            WriteSQL("--");
-
-            if (SQLForm.ZoneCheckBox.Checked)
-                StreamProcessor.GenerateZoneSQL(this.WriteSQL);
-
-            if (SQLForm.ZonePointCheckBox.Checked)
-                StreamProcessor.GenerateZonePointSQL(ZoneName, this.WriteSQL);
-
-            UInt32 SpawnVersion = (UInt32)SQLForm.VersionSelector.Value;
-
-            if (SQLForm.DoorCheckBox.Checked)
-            {
-                Log("Starting to generate SQL for Doors.");
-                StreamProcessor.GenerateDoorsSQL(ZoneName, DoorDBID, SpawnVersion, this.WriteSQL);
-                Log("Finished generating SQL for Doors.");
-            }
-
-            Log("Starting to generate SQL for Spawns and/or Grids.");
-
-            StreamProcessor.GenerateSpawnSQL(SQLForm.SpawnCheckBox.Checked, SQLForm.GridCheckBox.Checked, SQLForm.MerchantCheckBox.Checked, ZoneName, ZoneID, SpawnVersion, SQLForm.UpdateExistingNPCTypesCheckbox.Checked, SQLForm.NPCTypesTintCheckBox.Checked, SpawnNameFilter, CoalesceWaypoints, SQLForm.InvisibleMenCheckBox.Checked, this.WriteSQL);
-
-            Log("Finished generating SQL for Spawns and/or Grids.");
-
-            if (SQLForm.GroundSpawnCheckBox.Checked || SQLForm.ObjectCheckBox.Checked)
-            {
-                Log("Starting to generate SQL for Ground Spawns and/or Objects.");
-
-                StreamProcessor.GenerateObjectSQL(SQLForm.GroundSpawnCheckBox.Checked, SQLForm.ObjectCheckBox.Checked, SpawnVersion, this.WriteSQL);
-
-                Log("Finished generating SQL for Ground Spawns and/or Objects.");
-            }
-
-            StatusBar.Text = "SQL written to " + SQLFile;
-            SQLStream.Close();
         }
 
         private void menuPacketDump_Click(object sender, EventArgs e)
         {
-            if (PacketDumpFileDialog.ShowDialog() == DialogResult.OK)
+            if (PacketDumpFileDialog.ShowDialog() != DialogResult.OK) return;
+            SetStatus("Packet dump in progress. Please wait...");
+            Log("Packets dump in progress...");
+            DisableAllControls();
+            Application.DoEvents();
+            var bw = new BackgroundWorker();
+            bw.DoWork += DumpPackets;
+            bw.RunWorkerCompleted += EnableAllControlsOnCompletion;
+            bw.RunWorkerAsync();
+        }
+
+        private void EnableAllControlsOnCompletion(object sender, RunWorkerCompletedEventArgs e)
+        {
+            EnableAllControls();
+        }
+
+        private void DumpPackets(object sender, DoWorkEventArgs e)
+        {
+            if (_processor != null && _processor.StreamProcessor.DumpPackets(PacketDumpFileDialog.FileName, Properties.Settings.Default.DumpTimeStamps))
             {
-                StatusBar.Text = "Packet dump in progress. Please wait...";
-                Log("Packets dump in progress...");
-
-                DisableAllControls();
-
-                Application.DoEvents();
-
-                if (StreamProcessor.DumpPackets(PacketDumpFileDialog.FileName, Properties.Settings.Default.DumpTimeStamps))
-                {
-                    StatusBar.Text = "Packets dumped successfully.";
-                    Log("Packets dumped successfully.");
-                }
-                else
-                {
-                    StatusBar.Text = "Packet dump failed.";
-                    Log("Packet dump failed.");
-                }
-
-                EnableAllControls();
+                SetStatus("Packets dumped successfully.");
+                Log("Packets dumped successfully.");
+            }
+            else
+            {
+                SetStatus("Packet dump failed.");
+                Log("Packet dump failed.");
             }
         }
 
         private void menuDumpAAs_Click(object sender, EventArgs e)
         {
-            if (PacketDumpFileDialog.ShowDialog() == DialogResult.OK)
+            if (PacketDumpFileDialog.ShowDialog() != DialogResult.OK) return;
+            Log("AA dump in progress...");
+            DisableAllControls();
+            var bw = new BackgroundWorker();
+            bw.DoWork += DumpAAs;
+            bw.RunWorkerCompleted += EnableAllControlsOnCompletion;
+            bw.RunWorkerAsync();
+        }
+
+        private void DumpAAs(object sender, DoWorkEventArgs e)
+        {
+            if (_processor != null && _processor.StreamProcessor.DumpAAs(PacketDumpFileDialog.FileName))
             {
-                Log("AA dump in progress...");
-
-                DisableAllControls();
-
-                if (StreamProcessor.DumpAAs(PacketDumpFileDialog.FileName))
-                {
-                    StatusBar.Text = "AAs dumped successfully.";
-                    Log("AAs dumped successfully.");
-                }
-                else
-                {
-                    StatusBar.Text = "AA dumped failed.";
-                    Log("AA dump failed.");
-                }
-                EnableAllControls();
+                SetStatus("AAs dumped successfully.");
+                Log("AAs dumped successfully.");
+            }
+            else
+            {
+                SetStatus("AA dumped failed.");
+                Log("AA dump failed.");
             }
         }
 
@@ -431,7 +331,7 @@ namespace EQExtractor2
 
         private void menuViewDebugLog_Click(object sender, EventArgs e)
         {
-            menuViewDebugLog.Checked = DebugLog.Visible;
+            menuViewDebugLog.Checked = _debugLog.Visible;
 
             if (!menuViewDebugLog.Checked)
             {
@@ -442,29 +342,30 @@ namespace EQExtractor2
             else
             {
                 menuViewDebugLog.Checked = false;
-                DebugLog.Hide();
+                _debugLog.Hide();
             }
         }
 
         private void menuViewPackets_Click(object sender, EventArgs e)
         {
+            if (_processor == null) return;
             DisableAllControls();
 
             Application.DoEvents();
 
-            string TextFileViewer = Properties.Settings.Default.TextFileViewer;
+            var textFileViewer = Properties.Settings.Default.TextFileViewer;
 
-            string TempFileName = Path.GetTempFileName();
+            var tempFileName = Path.GetTempFileName();
 
-            if (StreamProcessor.DumpPackets(TempFileName, Properties.Settings.Default.DumpTimeStamps))
+            if (_processor.StreamProcessor.DumpPackets(tempFileName, Properties.Settings.Default.DumpTimeStamps))
             {
                 try
                 {
-                    System.Diagnostics.Process.Start(TextFileViewer, TempFileName);
+                    System.Diagnostics.Process.Start(textFileViewer, tempFileName);
                 }
                 catch
                 {
-                    StatusBar.Text = "Unable to launch " + TextFileViewer;
+                    StatusBar.Text = "Unable to launch " + textFileViewer;
                 }
             }
             else
@@ -476,24 +377,16 @@ namespace EQExtractor2
 
         private void EQExtractor2Form1_Load(object sender, EventArgs e)
         {
+            Text = _versionText;
             if (Properties.Settings.Default.ShowDebugWindowOnStartup)
             {
                 ShowDebugLog();
-
             }
         }
 
         private void DisplayUsageInfo()
         {
-#if DEBUG
-            Version += " (Debug Build)";
-#else
-            Version += " (Release Build)";
-#endif
-            Text = Version;
-
-            Log(Version + " Initialised.");
-
+            Log(_versionText + " Initialised.");
             Log("");
             Log("Instructions:");
             Log("Generate a .pcap file using Wireshark. To do this, park a character in the zone you want to collect in.");
@@ -510,49 +403,51 @@ namespace EQExtractor2
 
         private void menuOptions_Click(object sender, EventArgs e)
         {
-            DialogResult d = Options.ShowDialog();
 
-            if (d == DialogResult.OK)
+            if (_options.ShowDialog() == DialogResult.OK)
             {
-                Properties.Settings.Default.TextFileViewer = Options.PacketDumpViewerProgram.Text;
-                Properties.Settings.Default.ShowDebugWindowOnStartup = Options.ShowDebugWindowOnStartup.Checked;
-                Properties.Settings.Default.DumpTimeStamps = Options.ShowTimeStamps.Checked;
+                Properties.Settings.Default.TextFileViewer = _options.PacketDumpViewerProgram.Text;
+                Properties.Settings.Default.ShowDebugWindowOnStartup = _options.ShowDebugWindowOnStartup.Checked;
+                Properties.Settings.Default.DumpTimeStamps = _options.ShowTimeStamps.Checked;
                 Properties.Settings.Default.Save();
 
                 if (Properties.Settings.Default.ShowDebugWindowOnStartup)
                 {
-                    if (!DebugLog.Visible)
+                    if (!_debugLog.Visible)
                         ShowDebugLog();
                 }
                 else
                 {
-                    if (DebugLog.Visible)
-                    {
-                        DebugLog.Hide();
-                        menuViewDebugLog.Checked = false;
-                    }
+                    if (!_debugLog.Visible) return;
+                    _debugLog.Hide();
+                    menuViewDebugLog.Checked = false;
                 }
             }
             else
             {
-                Options.PacketDumpViewerProgram.Text = Properties.Settings.Default.TextFileViewer;
-                Options.ShowDebugWindowOnStartup.Checked = Properties.Settings.Default.ShowDebugWindowOnStartup;
-                Options.ShowTimeStamps.Checked = Properties.Settings.Default.DumpTimeStamps;
+                _options.PacketDumpViewerProgram.Text = Properties.Settings.Default.TextFileViewer;
+                _options.ShowDebugWindowOnStartup.Checked = Properties.Settings.Default.ShowDebugWindowOnStartup;
+                _options.ShowTimeStamps.Checked = Properties.Settings.Default.DumpTimeStamps;
             }
         }
 
         private void ShowDebugLog()
         {
-            DebugLog.Left = this.Location.X;
-            DebugLog.Top = this.Location.Y + this.Height;
-            DebugLog.Show();
+            _debugLog.Left = this.Location.X;
+            _debugLog.Top = this.Location.Y + this.Height;
+            _debugLog.Show();
             menuViewDebugLog.Checked = true;
             this.Focus();
         }
 
         private void menuView_Popup(object sender, EventArgs e)
         {
-            menuViewDebugLog.Checked = DebugLog.Visible;
+            menuViewDebugLog.Checked = _debugLog.Visible;
+        }
+
+        private void menuItem1_Click(object sender, EventArgs e)
+        {
+            SeqPatchImporter.Import();
         }
     }
 }
